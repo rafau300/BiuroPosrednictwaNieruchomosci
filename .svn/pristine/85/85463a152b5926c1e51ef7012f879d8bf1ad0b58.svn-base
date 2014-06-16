@@ -1,0 +1,88 @@
+import java.sql.Connection;  
+import java.sql.DriverManager;  
+import java.sql.ResultSet;
+import java.sql.SQLException;  
+import java.sql.Statement;
+  
+public class BazaDanych    {  
+
+	public static String polaczenie = new String();
+	static Connection con;
+	static int liczbaKlientow;
+	static int liczbaNieruchomosci;
+	
+	public void wyswietlKlientow(String skrypt, String[] imie, String[] nazwisko) {
+		int i = 1;
+		try {
+			Statement stmt;
+			stmt = con.createStatement();
+
+			ResultSet rs = stmt.executeQuery(skrypt);
+			while (rs.next()) {
+				imie[i] = rs.getString("imie");
+				nazwisko[i] = rs.getString("nazwisko");
+				System.out.println(imie[i] + " " + nazwisko[i]);
+				i++;
+			}
+			liczbaKlientow = i;
+        
+        } catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void wyswietlNieruchomosci(String skrypt, String[] miejscowosc, String[] ulica, int[] cena) {
+		int i = 1;
+		try {
+			Statement stmt;
+			stmt = con.createStatement();
+
+			ResultSet rs = stmt.executeQuery(skrypt);
+			while (rs.next()) {
+				miejscowosc[i] = rs.getString("miejscowosc");
+				ulica[i] = rs.getString("ulica");
+				cena[i] = rs.getInt("cena");
+				System.out.println(miejscowosc[i] + " " + ulica[i] + " - " + cena[i] + " zl");
+				i++;
+			}
+			liczbaNieruchomosci = i;
+        
+        } catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void insert(String skrypt) {
+		try {
+			Statement stmt;
+			stmt = con.createStatement();
+
+			stmt.executeUpdate(skrypt);
+			System.out.println(">>Wykonano: " + skrypt);
+        } catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void main(String[] args) {  
+		//BazaDanych baza = new BazaDanych();
+        try {  
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            con = DriverManager.getConnection("jdbc:oracle:thin:@//localhost:1521/xe","hr","hr");  
+            polaczenie = con.toString();
+            System.out.println("Polaczono z: " + con); 
+            //baza.wyswietlKlientow("SELECT * FROM klient",new String[50],new String[50]);
+        } catch (ClassNotFoundException e) {  
+            // TODO Auto-generated catch block  
+            e.printStackTrace();  
+        } catch (SQLException e) {  
+            // TODO Auto-generated catch block  
+            e.printStackTrace();  
+        }  
+          
+    }  
+  
+}  

@@ -1,0 +1,151 @@
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.*;
+
+
+/**
+ * @author Rafal
+ * Glowna klasa programu, za jej pomoca mozna obslugiwac system
+ */
+public class Biuro {
+	
+	static int szerokosc=800;
+	static int wysokosc=600;
+	
+	static Klient klient = new Klient();
+	static Sprzedaz s = new Sprzedaz();
+	
+	static JFrame f = new JFrame("System obslugi biura posrednictwa nieruchomosci");
+    static JPanel panel = new JPanel();
+    final static JLabel label = new JLabel("Biuro");
+    final static JButton b1 = new JButton("Zaloguj");
+    final static JButton b2 = new JButton("Sprzeda¿ nieruchomosci");
+    final static JButton b3 = new JButton("Zakup nieruchomosci");
+    final static JButton b4 = new JButton("Zarejestruj klienta");
+    final static JButton b99 = new JButton("Powrót");
+    final static JLabel labelImie = new JLabel("Imie:");
+    final static JTextField textImie = new JTextField("");
+	
+	public Biuro() {
+		
+	}
+	
+	static void ustawRamke() {
+        f.setSize(szerokosc,wysokosc);
+        f.add(panel);
+        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+        f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
+        panel.add(label);
+        //f.setResizable(false);
+        //f.pack();
+        f.setLayout(new FlowLayout());
+        f.setVisible(true);
+	}
+	
+	static void ustawPrzyciski () {
+		b1.setSize(100, 50);
+        panel.add(b1);
+		
+        b2.setSize(100, 50);
+        b2.setVisible(false);
+        panel.add(b2);
+        
+        b3.setSize(100, 50);
+        b3.setVisible(false);
+        panel.add(b3);
+        
+        b4.setSize(100, 50);
+        b4.setVisible(false);
+        panel.add(b4);
+        
+        b99.setSize(100, 50);
+        b99.setVisible(false);
+        panel.add(b99);
+	}
+	
+	static void ustawWidocznoscPoZalogowaniu () {
+		b1.setName("ASDF");
+		b1.setVisible(false);
+		label.setText("Zalogowano do systemu");
+		b2.setVisible(true);
+		b3.setVisible(true);
+		b4.setVisible(true);
+		b99.setVisible(true);
+		textImie.setVisible(false);
+		labelImie.setVisible(false);
+	}
+	
+	static void listenerPrzyciskuZaloguj () {
+        b1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				if(b1.isEnabled()) {
+					ustawWidocznoscPoZalogowaniu();
+				}
+			}
+        	
+        });
+	}
+	
+	static void listenerPrzyciskuDodajPracownika () {
+		b4.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		if(b4.isEnabled()) {
+        			b2.setVisible(false);
+        			b3.setVisible(false);
+        			labelImie.setVisible(true);
+        			textImie.setVisible(true);
+        			if(b4.isEnabled() && textImie.getText().equals("") == false) {
+        				klient.dodajKlienta(textImie.getText(), "", 0);
+        				JOptionPane.showMessageDialog(null, "Dane klienta: " + klient.imie + " " + klient.nazwisko + " " +klient.nrTelefonu);
+        			}
+        		}
+        	}
+        });
+	}
+
+	/**
+	 * @param args
+	 * glowna metoda w programie
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+        SwingUtilities.invokeLater(new Runnable() { public void run() {
+            
+        	ustawRamke();
+            ustawPrzyciski();
+                        
+            
+            labelImie.setVisible(false);
+            panel.add(labelImie);
+            
+            panel.add(textImie);
+            textImie.setVisible(false);
+            
+            listenerPrzyciskuZaloguj();
+            listenerPrzyciskuDodajPracownika();
+            
+            b2.addActionListener(new ActionListener() {
+            	public void actionPerformed(ActionEvent e) {
+            		if (b2.isEnabled()) {
+            			Sprzedaz.main(null);
+            		}
+            	}
+            });
+
+            b99.addActionListener(new ActionListener() {
+            	public void actionPerformed(ActionEvent e) {
+            		if (b99.isEnabled()) {
+            		ustawWidocznoscPoZalogowaniu();
+            		}
+            	}
+            });
+            
+           
+        } });
+
+	}
+
+}

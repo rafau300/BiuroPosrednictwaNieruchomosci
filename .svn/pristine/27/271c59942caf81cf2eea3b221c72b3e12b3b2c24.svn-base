@@ -1,0 +1,38 @@
+
+public class Nieruchomosc {
+	
+	int id;
+	boolean czyNaSprzedaz;
+	float cena;
+	float powierzchnia;
+	int rokZbudowaniaNieruchomosci;
+
+	public void sprzedaj() {
+		
+	}
+	
+	public void kup() {
+		
+	}
+	
+	public void uzupelnijDane() {
+		
+	}
+	
+	public void modyfikujDane() {
+		
+	}
+	
+	public void wyszukaj() {
+		
+	}
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

@@ -1,0 +1,324 @@
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
+
+
+/**
+ * Klasa, w  ktorej znajduja sie szczegolowe dane poszczegolnych nieruchomosci.
+ * Nalezy wybrac odpowienia nieruchomosc za pomoca myszy w pierszej tabeli, a szczegolowe dane
+ * beda wyswietlone w drugiej. Jesli dane nie mieszcza sie w tabeli, to automatycznie utworzy
+ * sie pasek przewijania.
+ * @author Rafal Bebenek
+ */
+public class Nieruchomosc {
+	
+	static BazaDanych baza = new BazaDanych();
+	static Biuro biuro = new Biuro();
+	
+	static int id;
+	boolean czyNaSprzedaz;
+	//float cena;
+	float powierzchnia;
+	int rokZbudowaniaNieruchomosci;
+	
+	static int iloscRekordow = 50;
+	static String[] miejscowosc = new String[iloscRekordow];
+	static String[] ulica = new String[iloscRekordow];
+	static int[] cena = new int[iloscRekordow];
+
+	static String[] dane = new String[15];
+	static String[] kolumny = new String[15];
+	
+	final static JFrame f = new JFrame("Szczegolowe dane nieruchomosci");
+    static JPanel panel = new JPanel();
+    static JButton ok = new JButton ("OK");
+    
+    static JLabel label = new JLabel();
+    static String data[][] = {};
+    static String col[] = {"Miejscowosc","Ulica","Cena"};
+    static DefaultTableModel model = new DefaultTableModel(data,col);
+    
+    static JTable tabelaNieruchomosci = new JTable(model);
+    static JScrollPane scrollpane = new JScrollPane(tabelaNieruchomosci);
+    
+    static JLabel label2 = new JLabel();
+    static String data2[][] = {};
+    static String col2[] = {"Typ","Dane"};
+    static DefaultTableModel model2 = new DefaultTableModel(data2,col2);
+    
+    static JTable tabelaZDanymi = new JTable(model2);
+    static JScrollPane scrollpane2 = new JScrollPane(tabelaZDanymi);
+    
+    
+    static Serwer serwer = new Serwer();
+    
+    /**
+	 * Tworzenie i ustawianie ramki, na ktorej znajduja sie poszczegolne elementy
+	 */
+    static void ustawRamke() {
+	    f.setSize(640,480);
+        f.add(panel);
+        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+        f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
+        //f.setResizable(false);
+        //f.pack();
+        f.setLayout(new FlowLayout());
+        f.setVisible(true);
+	}
+    
+    /**
+	 * Wyswietlenie listy nieruchomosci dostepnych w bazie danych.
+	 */
+	static void wyswietlListeDostepnychNieruchomosci() {
+		//Lista dostepnych nieruchomosci
+        
+        label.setText("Lista dostepnych nieruchomosci:");
+        panel.add(label);
+        
+        scrollpane.setPreferredSize(new Dimension(500,150));
+        panel.add(scrollpane);
+        
+        	//serwer.wyswietlNieruchomosci("SELECT * FROM nieruchomosc",miejscowosc,ulica,cena);
+        	//baza.wyswietlNieruchomosci("SELECT * FROM nieruchomosc",miejscowosc,ulica,cena);
+        
+        Thread t = new Thread(new Runnable() {
+			@SuppressWarnings("static-access")
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				
+	        	biuro.lock.lock();
+				biuro.wiadomosc.idCzynnosciDoWykonania = 3;
+	        	biuro.wiadomosc.skryptSQL = "SELECT * FROM nieruchomosc";
+	        	biuro.przesylka();
+	        	
+				
+				while (biuro.odebranoWiadomosc != true) {
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				}
+				
+				if (biuro.odebranoWiadomosc == true) {
+		        	int i=1;
+		        	while (biuro.wiadomosc.miejscowosc[i] != null) {
+		        		model.insertRow(i-1,new Object[]{biuro.wiadomosc.miejscowosc[i],
+		        				biuro.wiadomosc.ulica[i],biuro.wiadomosc.cena[i]});
+		        		i++;
+		        	}
+		        	biuro.odebranoWiadomosc = false;
+		        	//wyswietlSzczegoloweDaneKlienta(1);
+				}
+				
+				biuro.lock.unlock();
+			}
+    	});
+    	
+    	t.start();
+
+
+        
+        MouseListener listener = new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                  //id = tabelaKupujacych.rowAtPoint(e.getPoint())+1;
+                  id = tabelaNieruchomosci.getSelectedRow() + 1;
+                  edytujSzczegoloweDaneNieruchomosci(id);
+            }
+         };
+         
+         tabelaNieruchomosci.addMouseListener(listener);
+        
+	}
+	
+	/**
+	 * Wyswietlenie szczegolowych danych nieruchomosci
+	 * @param id ID nieruchomosci
+	 */
+	public static void wyswietlSzczegoloweDaneNieruchomosci(int id) {
+        
+        final int idNieruchomosci = id;
+		
+		label2.setText("Szczegolowe dane wybranej nieruchomosci:");
+        panel.add(label2);
+        
+		//try {
+		//	serwer.wyswietlSzczegoloweDaneNieruchomosci(id, dane, kolumny);   
+        	//baza.wyswietlSzczegoloweDaneNieruchomosci(id, dane, kolumny);        	
+        //	} catch (Exception e) {
+        //		e.printStackTrace();
+        //	}
+	        scrollpane2.setVisible(true);
+	        scrollpane2.setPreferredSize(new Dimension(500,150));
+	        panel.add(scrollpane2);
+	        
+	        
+	        Thread t = new Thread(new Runnable() {
+				@SuppressWarnings("static-access")
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					
+		        	biuro.lock.lock();
+					biuro.wiadomosc.idCzynnosciDoWykonania = 4;
+		        	biuro.wiadomosc.skryptSQL = "SELECT * FROM nieruchomosc";
+		        	biuro.wiadomosc.idNieruchomosci = idNieruchomosci;
+		        	biuro.przesylka();
+		        	
+					
+					while (biuro.odebranoWiadomosc != true) {
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					}
+					
+					int i = 1;
+	    			while (!biuro.wiadomosc.kolumny[i].equalsIgnoreCase("nr_mieszkania")) {
+	    				i++;
+	    			}
+	    			if (biuro.wiadomosc.dane[i] == null) biuro.wiadomosc.dane[i] = "---";
+					
+					if (biuro.odebranoWiadomosc == true) {
+			        	i=1;
+			        	while (biuro.wiadomosc.dane[i] != null) {
+			        		model2.insertRow(i-1, new Object[]{biuro.wiadomosc.kolumny[i],
+			        				biuro.wiadomosc.dane[i]});
+			        		i++;
+			        	}
+			        	biuro.odebranoWiadomosc = false;
+			        	//wyswietlSzczegoloweDaneKlienta(1);
+					}
+					
+					biuro.lock.unlock();
+				}
+	    	});
+	    	
+	    	t.start();
+
+	}
+	
+	/**
+	 * Wyswietlenie szczegolowych danych nieruchomosci.
+	 * @param id ID nieruchomosci
+	 */
+	@SuppressWarnings("static-access")
+	public static void edytujSzczegoloweDaneNieruchomosci(int id) {
+		
+		final int idNieruchomosci = id;
+		//try {
+		//	serwer.wyswietlSzczegoloweDaneNieruchomosci(id, dane, kolumny);
+        	//baza.wyswietlSzczegoloweDaneNieruchomosci(id, dane, kolumny);        	
+        	//} catch (Exception e) {
+        	//	e.printStackTrace();
+        	//}
+		
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				
+	        	biuro.lock.lock();
+				biuro.wiadomosc.idCzynnosciDoWykonania = 4;
+	        	biuro.wiadomosc.skryptSQL = "SELECT * FROM nieruchomosc";
+	        	biuro.wiadomosc.idNieruchomosci = idNieruchomosci;
+	        	biuro.przesylka();
+	        	
+				
+				while (biuro.odebranoWiadomosc != true) {
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				}
+				
+				if (biuro.odebranoWiadomosc == true) {
+		        	int i=1;
+		    		//for (i = model2.getRowCount()-1;i>0;i--);
+		    		//	model2.removeRow(i);
+		    			
+		    			model2.setRowCount(0);
+		    			
+		    			//Jesli nr mieszkania jest pusty, to wstaw kreski
+		    			i = 1;
+		    			while (!biuro.wiadomosc.kolumny[i].equalsIgnoreCase("nr_mieszkania")) {
+		    				i++;
+		    			}
+		    			if (biuro.wiadomosc.dane[i] == null) biuro.wiadomosc.dane[i] = "---";
+		    		
+		        	
+		        	i = 1;
+			        try {
+			        	while (biuro.wiadomosc.dane[i] != null) {
+			        		model2.insertRow(i-1, new Object[]{biuro.wiadomosc.kolumny[i],biuro.wiadomosc.dane[i]});
+			        		i++;
+			        	}
+			        } catch (Exception e) {
+			        	e.printStackTrace();
+			        }
+			        biuro.odebranoWiadomosc = false;
+				}
+				
+				biuro.lock.unlock();
+			}
+    	});
+    	
+    	t.start();
+	        
+	        
+		
+	}
+	
+	/**
+	 * Glowna metoda, ktora glownie wywoluje inne metody
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		
+		SwingUtilities.invokeLater(new Runnable() { public void run() {
+		
+		model.setRowCount(0);
+		model2.setRowCount(0);
+			
+		ustawRamke();
+		wyswietlListeDostepnychNieruchomosci();
+		wyswietlSzczegoloweDaneNieruchomosci(1);
+		
+		ok.setSize(100, 50);
+        ok.setVisible(true);
+        panel.add(ok);
+        
+        ok.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		if (ok.isEnabled()) {
+        			f.dispose();
+        			baza.zamknijPolaczenie();
+        		}
+        	}
+        });
+		}
+	});
+	}
+
+}

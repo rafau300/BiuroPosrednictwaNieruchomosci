@@ -1,0 +1,170 @@
+import java.sql.Connection;  
+import java.sql.DriverManager;  
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;  
+import java.sql.Statement;
+  
+/**
+ * Klasa pozwalajaca na edycje i wyswietlanie danych zawartych w bazie danych projektu,
+ * wywolanie konstruktora tej klasy tworzy nowe polaczenie z baza danych
+ * @author Rafal Bebenek
+ */
+public class BazaDanych    {  
+
+	public static String polaczenie = new String();
+	static Connection con;
+	static int liczbaKlientow;
+	static int liczbaNieruchomosci;
+	
+	/**
+	 * Konstruktor klasy BazaDanych - laczy sie z baza danych.
+	 */
+	public BazaDanych() {
+		//BazaDanych baza = new BazaDanych();
+		try {  
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            con = DriverManager.getConnection("jdbc:oracle:thin:@//localhost:1521/xe","hr","hr");  
+            polaczenie = con.toString();
+            System.out.println("Polaczono z: " + con); 
+            this.wyswietlKlientow("SELECT * FROM klient",new String[50],new String[50]);
+            this.wyswietlNieruchomosci("SELECT * FROM nieruchomosc", new String[50],new String[50],new int[50]);
+        } catch (ClassNotFoundException e) {  
+            // TODO Auto-generated catch block  
+            e.printStackTrace();  
+        } catch (SQLException e) {  
+            // TODO Auto-generated catch block  
+            e.printStackTrace();  
+        }  
+	}
+	
+	/**
+	 * Ta metoda pozwala na wyswietlenie klientow za pomoca podanego skryptu
+	 * @param skrypt Skrypt SQL, np SELECT * FROM klient
+	 * @param imie tablica imion
+	 * @param nazwisko tablica nazwisk
+	 */
+	public void wyswietlKlientow(String skrypt, String[] imie, String[] nazwisko) {
+		int i = 1;
+		try {
+			Statement stmt;
+			stmt = con.createStatement();
+
+			ResultSet rs = stmt.executeQuery(skrypt);
+			while (rs.next()) {
+				imie[i] = rs.getString("imie");
+				nazwisko[i] = rs.getString("nazwisko");
+				System.out.println(imie[i] + " " + nazwisko[i]);
+				i++;
+			}
+			liczbaKlientow = i;
+        
+        } catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Metoda pozwalajaca na zwrocenie poprzez parametr szczegolowych danych klienta
+	 * @param id ID klienta
+	 * @param dane Szczegolowe dane
+	 * @param kolumny Nazwy kolumn, np. nazwisko
+	 */
+	public void wyswietlSzczegoloweDaneKlienta(int id, String[] dane, String[] kolumny) {
+		int i;
+		try {
+			Statement stmt;
+			stmt = con.createStatement();
+			
+			String skrypt = "SELECT * FROM klient WHERE id=" + id;
+			ResultSet rs = stmt.executeQuery(skrypt);
+			
+			rs.next();
+			for (i=1;i<10;i++) {
+				dane[i] = rs.getString(i);
+				ResultSetMetaData rsmd = rs.getMetaData();
+				kolumny[i] = rsmd.getColumnName(i);
+			}
+        
+        } catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Ta metoda pozwala na wybranie z bazy danych informacji na temat  nieruchomosci
+	 * @param skrypt skrypt SQL, np. SELECT * FROM nieruchomosc WHERE miejscowosc='Kielce'
+	 * @param miejscowosc tablica miejscowosci
+	 * @param ulica tablica ulic
+	 * @param cena tablica cen
+	 */
+	public void wyswietlNieruchomosci(String skrypt, String[] miejscowosc, String[] ulica, int[] cena) {
+		int i = 1;
+		try {
+			Statement stmt;
+			stmt = con.createStatement();
+
+			ResultSet rs = stmt.executeQuery(skrypt);
+			while (rs.next()) {
+				miejscowosc[i] = rs.getString("miejscowosc");
+				ulica[i] = rs.getString("ulica");
+				cena[i] = rs.getInt("cena");
+				System.out.println(miejscowosc[i] + " " + ulica[i] + " - " + cena[i] + " zl");
+				i++;
+			}
+			liczbaNieruchomosci = i;
+        
+        } catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Metoda, ktora pozwala na zwrocenie poprzez parametry szczegolowych danych konkretnej nieruchomosci
+	 * @param id ID nieruchomosci
+	 * @param dane Dane nieruchomosci
+	 * @param kolumny Nazwy kolumn, np. cena 
+	 */
+	public void wyswietlSzczegoloweDaneNieruchomosci(int id, String[] dane, String[] kolumny) {
+		int i;
+		try {
+			Statement stmt;
+			stmt = con.createStatement();
+			
+			String skrypt = "SELECT * FROM nieruchomosc WHERE id=" + id;
+			ResultSet rs = stmt.executeQuery(skrypt);
+			
+			rs.next();
+			for (i=1;i<11;i++) {
+				dane[i] = rs.getString(i);
+				ResultSetMetaData rsmd = rs.getMetaData();
+				kolumny[i] = rsmd.getColumnName(i);
+			}
+        
+        } catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Metoda, ktora pozwala na dodanie klienta lub nieruchomosci do bazy danych
+	 * @param skrypt Skrypt SQL, np. INSERT INTO klient VALUES ...
+	 */
+	public void insert(String skrypt) {
+		try {
+			Statement stmt;
+			stmt = con.createStatement();
+
+			stmt.executeUpdate(skrypt);
+			System.out.println(">>Wykonano: " + skrypt);
+        } catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	} 
+  
+}  

@@ -1,0 +1,42 @@
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.*;
+
+public class Sprzedaz {
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		SwingUtilities.invokeLater(new Runnable() { public void run() {
+			final JFrame f = new JFrame("Sprzedaz nieruchomosci");
+		    JPanel panel = new JPanel();
+		    f.setSize(640,480);
+	        f.add(panel);
+	        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+	        f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
+	        //f.setResizable(false);
+	        //f.pack();
+	        f.setLayout(new FlowLayout());
+	        f.setVisible(true);
+	        
+	        final JButton ok = new JButton ("OK");
+	        ok.setSize(100, 50);
+	        ok.setVisible(true);
+	        panel.add(ok);
+	        
+	        ok.addActionListener(new ActionListener() {
+            	public void actionPerformed(ActionEvent e) {
+            		if (ok.isEnabled()) {
+            			f.dispose();
+            		}
+            	}
+            });
+		}
+	});
+
+}
+}

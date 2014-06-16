@@ -1,0 +1,40 @@
+
+public class Klient {
+	
+	Nieruchomosc nieruchomosc = new Nieruchomosc();
+	
+	int id;
+	String imie;
+	String nazwisko;
+	int nrTelefonu;
+	
+	Klient() {
+		imie="Janusz";
+		nazwisko="Korwin Mikke";
+		nrTelefonu=123456789;
+	}
+	
+	public void dodajKlienta(String imie, String nazwisko, int nrTelefonu) {
+		this.imie=imie;
+		this.nazwisko=nazwisko;
+		this.nrTelefonu=nrTelefonu;
+	}
+	
+	public void zaplacNaleznosc(int kwota) {
+		
+	}
+	
+	public void wyswietlKlientow() {
+		BazaDanych baza = new BazaDanych();
+		baza.wyswietlKlientow("SELECT * FROM klient",new String[50], new String[50]);
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

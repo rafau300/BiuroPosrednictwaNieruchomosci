@@ -1,0 +1,175 @@
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.*;
+
+/**
+ * Klasa pozwalajaca na dodanie nowego klienta do bazy.
+ * Uzytkownik wypelnia odpowiednie pola wartosciami, ktore sa pozniej dodawane
+ * do bazy danych obslugujacej projekt
+ * @author Rafal Bebenek
+ */
+public class DodajKlienta {
+	
+	static JFrame f = new JFrame("Dodaj Klienta");
+	static JPanel panel = new JPanel();
+	static JButton anuluj = new JButton ("Anuluj");
+	
+	final static JLabel labelImie = new JLabel("Imie:");
+    final static JTextField textImie = new JTextField("");
+    final static JLabel labelNazwisko = new JLabel("Nazwisko:");
+    final static JTextField textNazwisko = new JTextField("");
+    final static JLabel labelUlica = new JLabel("Ulica:");
+    final static JTextField textUlica = new JTextField("");
+    final static JLabel labelNrDomu = new JLabel("Numer domu:");
+    final static JTextField textNrDomu = new JTextField("");
+    final static JLabel labelKodPocztowy = new JLabel("Kod pocztowy:");
+    final static JTextField textKodPocztowy = new JTextField("");
+    final static JLabel labelMiejscowosc = new JLabel("Miejscowosc:");
+    final static JTextField textMiejscowosc = new JTextField("");
+    final static JLabel labelPesel = new JLabel("PESEL:");
+    final static JTextField textPesel = new JTextField("");
+    final static JLabel labelNrTelefonu = new JLabel("Numer telefonu:");
+    final static JTextField textNrTelefonu = new JTextField("");
+    
+    static JButton przyciskZarejestruj = new JButton("Zarejestruj klienta");
+    
+    static Klient klient = new Klient();
+    static BazaDanych baza = new BazaDanych();
+	
+	/**
+	 * Dodanie nowego klienta do bazy, listener przycisku
+	 */
+    static void listenerPrzyciskuDodajKlienta () {
+		przyciskZarejestruj.addActionListener(new ActionListener() {
+        	@SuppressWarnings("static-access")
+			public void actionPerformed(ActionEvent e) {
+        		if(przyciskZarejestruj.isEnabled() && textImie.getText().equals("") == false) {
+        				try {        					
+        					int id = baza.liczbaKlientow;
+        					String imie = textImie.getText();
+        					String nazwisko = textNazwisko.getText();
+        					String ulica = textUlica.getText();
+        					String nr_domu = textNrDomu.getText();
+        					String kod_pocztowy = textKodPocztowy.getText();
+        					String poczta = textMiejscowosc.getText();
+        					long pesel = Long.parseLong(textPesel.getText());
+        					long nr_telefonu = Long.parseLong(textNrTelefonu.getText());
+        					
+        					String skrypt = new String();
+        					skrypt = "INSERT INTO klient(id, imie, nazwisko, ulica, nr_domu, kod_pocztowy, poczta, pesel, nr_telefonu) " +
+        					"VALUES (" + id + ", '" + imie + "', '" + nazwisko + "', '" + ulica + "', '" + nr_domu + 
+        					"', '" + kod_pocztowy + "', '" + poczta +  "', " + pesel + ", " + nr_telefonu + ")";
+        					
+        					baza.insert(skrypt);
+        					
+        					JOptionPane.showMessageDialog(null, "Zapisano klienta: " + imie + " " + nazwisko);
+        		
+        				} catch (NumberFormatException wyjatek) {
+        					JOptionPane.showMessageDialog(null,"Telefon musi miec wartosc numeryczna!");
+        					wyjatek.printStackTrace();
+        				}
+        				catch (Exception wyjatek) {
+        					JOptionPane.showMessageDialog(null,"Wystapil blad!");
+        				}
+        				finally {
+        					f.dispose();
+        				}
+        		}
+        	}
+        });
+	}
+    
+    /**
+     * Tworzenie, i ustawianie ramki
+     */
+    static void ustawRamke() {
+	    f.setSize(640,480);
+        f.add(panel);
+        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+        f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
+        //f.setResizable(false);
+        //f.pack();
+        f.setLayout(new FlowLayout());
+        f.setVisible(true);
+    }
+    
+    /**
+     * Ustawianie widocznosci labeli i pol tekstowych oraz dodanie ich do panelu
+     */
+    static void ustawLabeleIPolaTekstowe() {
+    	labelImie.setVisible(true);
+		textImie.setVisible(true);
+        panel.add(labelImie);
+        panel.add(textImie);
+        
+		labelNazwisko.setVisible(true);
+		textNazwisko.setVisible(true);
+        panel.add(labelNazwisko);
+        panel.add(textNazwisko);
+        
+		labelUlica.setVisible(true);
+		textUlica.setVisible(true);
+        panel.add(labelUlica);
+        panel.add(textUlica);
+        
+		labelNrDomu.setVisible(true);
+		textNrDomu.setVisible(true);
+        panel.add(labelNrDomu);
+        panel.add(textNrDomu);
+        
+        labelKodPocztowy.setVisible(true);
+		textKodPocztowy.setVisible(true);
+        panel.add(labelKodPocztowy);
+        panel.add(textKodPocztowy);
+        
+        labelMiejscowosc.setVisible(true);
+		textMiejscowosc.setVisible(true);
+        panel.add(labelMiejscowosc);
+        panel.add(textMiejscowosc);
+        
+        labelPesel.setVisible(true);
+		textPesel.setVisible(true);
+        panel.add(labelPesel);
+        panel.add(textPesel);
+        
+		labelNrTelefonu.setVisible(true);
+		textNrTelefonu.setVisible(true);
+        panel.add(labelNrTelefonu);
+        panel.add(textNrTelefonu);
+    }
+	
+	/**
+	 * glowna metoda w klasie
+	 * @param args
+	 */
+    public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		SwingUtilities.invokeLater(new Runnable() { public void run() {
+		    
+	        ustawRamke();
+			ustawLabeleIPolaTekstowe();
+			
+	        
+	        przyciskZarejestruj.setSize(100, 50);
+	        przyciskZarejestruj.setVisible(true);
+	        panel.add(przyciskZarejestruj);
+	          
+	        anuluj.setSize(100, 50);
+	        anuluj.setVisible(true);
+	        panel.add(anuluj);
+	        
+	        listenerPrzyciskuDodajKlienta();
+	        
+	        anuluj.addActionListener(new ActionListener() {
+            	public void actionPerformed(ActionEvent e) {
+            		if (anuluj.isEnabled()) {
+            			f.dispose();
+            		}
+            	}
+            });
+		}
+	});
+
+}
+}

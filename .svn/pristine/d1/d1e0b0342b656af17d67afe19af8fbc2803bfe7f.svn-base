@@ -1,0 +1,314 @@
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+/**
+ * Klasa, w ktorej znajduje sie serwer.
+ * @author Rafal Bebenek
+ */
+public class Serwer implements Serializable, Runnable {
+	
+	static ServerSocket server;
+	static final long serialVersionUID = 1L;
+
+	private static Socket klient = new Socket();
+	static boolean flaga = true;
+
+	static int kropki = 0;
+	
+	static int i = 0;
+	
+	static BazaDanych baza = new BazaDanych();
+	
+	
+	
+	/**
+	 * Ta funkcja w trakcie oczekiwania na klienta wyswietla kropki na ekranie, zeby uzytkownik serwera
+	 * wiedzial, ze serwer dziaa prawidlowo i moze przyjmowac nowe polaczenia
+	 */
+	static void oczekiwanieNaKlienta() {
+		Thread watek = new Thread(new Runnable() {
+			public void run() {
+				while (flaga) {
+					try {
+						Thread.sleep(1000); // timer, uruchamia sie co
+											// 1000 ms
+						System.out.print(".");
+						kropki++;
+						if (kropki % 60 == 0)
+							System.out.println();
+					} catch (InterruptedException ie) {
+						System.err.println("Wystapil blad w watku!");
+						ie.printStackTrace();
+					}
+				}
+			}
+		});
+		watek.start();
+	}
+	
+	public void wyswietlKlientow(String skrypt, String[] imie, String[] nazwisko) {
+		baza.wyswietlKlientow(skrypt, imie, nazwisko);
+	}
+	
+	public void wyswietlSzczegoloweDaneKlienta(int id, String[] dane, String[] kolumny) {
+		baza.wyswietlSzczegoloweDaneKlienta(id, dane, kolumny);
+	}
+	
+	public void wyswietlNieruchomosci(String skrypt, String[] miejscowosc, String[] ulica, int[] cena) {
+		baza.wyswietlNieruchomosci(skrypt, miejscowosc, ulica, cena);
+	}
+	
+	public void wyswietlSzczegoloweDaneNieruchomosci(int id, String[] dane, String[] kolumny) {
+		baza.wyswietlSzczegoloweDaneNieruchomosci(id, dane, kolumny);
+	}
+	
+	public void insert(String skrypt) {
+		baza.insert(skrypt);
+	}
+	
+
+	/**
+	 * funkcja, w ktorej wykonuje sie serwer
+	 * 
+	 * @param args
+	 * @throws Funkcja wyrzuca wyjatki w przypadku problemow z siecia
+	 */
+	public static void main(String[] args) throws Exception {
+		
+		try {
+			server = new ServerSocket(54321);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Uruchomiono serwer");
+		// Socket socket = server.accept();
+		System.out.println("Oczekiwanie na podlaczenie sie klienta...");
+
+		oczekiwanieNaKlienta();
+		
+		new Thread(new Serwer()).start();
+
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		while (true) {	
+			try {
+				klient = server.accept();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			i++;
+			flaga=false;
+			new Wymiana (klient,i).start();	//start nowego watku dla kazdego z klientow
+	}
+	}
+	
+
+}
+
+/**
+ * Klasa pozwalajaca na przesylanie danych w oddzielnych watkach dla kazdego z klientow
+ * @author Rafal
+ *
+ */
+class Wymiana extends Thread {
+	
+	static Serwer serwer = new Serwer();
+	static BazaDanych baza = new BazaDanych();
+	
+	static ServerSocket server;
+	static ServerSocket serverSerializacji;
+	private static int maksymalnaLiczbaKlientow = 10;
+	
+	static Wiadomosc[] wiadomosc = new Wiadomosc[maksymalnaLiczbaKlientow];
+	static Logowanie[] logowanie = new Logowanie[maksymalnaLiczbaKlientow];
+	
+	static Socket klient;
+	static int ktoryKlient;
+	static byte liczbaPodlaczonychKlientow = 0;
+	
+	
+	@SuppressWarnings("static-access")
+	public Wymiana (Socket klient, int i) {
+		this.klient = klient;
+		this.ktoryKlient = i;
+		this.liczbaPodlaczonychKlientow++;
+
+		polaczeniePoprzezSerializacje();
+	}
+	
+	
+	static void polaczeniePoprzezSerializacje() {
+		
+		//k = klient;
+		
+		try {
+			serverSerializacji = new ServerSocket(54322);
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
+		Thread polaczenie = new Thread(new Runnable() {// tworzenie nowego watku
+			@SuppressWarnings("static-access")
+			public void run() {
+				
+				int i = ktoryKlient;
+				
+				try {
+				//klient[i] = server.accept();
+				System.out.println("\n>>Przylaczyl sie " + i + " klient");
+				klient.getOutputStream().write(i);
+				
+				System.out.println(">>Wysylam potwierdzenie do klienta nr: " + i);
+				klient.getOutputStream().write(1111);// wysy�anie do graczy
+				//server.close();	
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				
+				//Polaczenie przez serializacje:
+				try {
+					//serverSerializacji = new ServerSocket(54322);
+					klient=serverSerializacji.accept();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+
+				
+				ObjectOutputStream out = null;
+				ObjectInputStream in = null;
+				try {
+					out = new ObjectOutputStream(
+							klient.getOutputStream());
+					in = new ObjectInputStream(
+							klient.getInputStream());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				//Logowanie do systemu
+				try {
+					logowanie[i] = (Logowanie) in.readObject();
+
+				} catch (Exception e) {
+					System.err.println("Blad logowania klienta nr: " + i);
+				}
+
+				if (logowanie[i].login.equals("pracownik") && logowanie[i].haslo.equals("haslo")) {
+					logowanie[i].czyZalogowano = true;
+					System.out.println("Klient " + i + " poprawnie sie zalogowal" + 
+							" jako uzytkownik: " + logowanie[i].login);
+				}
+				else {
+					if (logowanie[i].wiadomoscZwrotna == null) logowanie[i].wiadomoscZwrotna = "";
+						
+					if (! logowanie[i].login.equalsIgnoreCase("pracownik")) {
+						logowanie[i].wiadomoscZwrotna += "Nieprawidlowy login \n";
+					}
+					if (! logowanie[i].haslo.equalsIgnoreCase("haslo")) {
+						logowanie[i].wiadomoscZwrotna += "Nieprawidlowe haslo \n";
+					}
+				}
+				
+				
+				try {
+					out.writeObject(logowanie[i]);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					System.err.println("Blad wysylania informacji o logowaniu klienta nr: " + i);
+				}
+				
+				
+				/*try {
+					serverSerializacji.close();
+					//server.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}*/
+				
+				
+				//przesylanie wiadomosci
+				
+				
+				try {
+					out = new ObjectOutputStream(
+							klient.getOutputStream());
+					in = new ObjectInputStream(
+							klient.getInputStream());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				do {
+				
+				try {
+					wiadomosc[i] = (Wiadomosc) in.readObject();
+
+				} catch (Exception e) {
+					System.err.println("Nie odebrano pakietu od klienta nr: " + i);
+				}
+			
+				
+				if (wiadomosc[i].koniec == true) {
+					System.out.println("klient nr " + i + " wylogowal sie");
+					liczbaPodlaczonychKlientow--;
+					if (liczbaPodlaczonychKlientow == 0) {
+						System.out.println("Wszyscy klienci sie wylogowali\nOczekiwanie na kolejnych...");
+						serwer.flaga = true;
+						serwer.oczekiwanieNaKlienta();
+					}
+				}
+				
+				if (wiadomosc[i].skryptSQL.length() > 0) {
+					
+				}
+				
+				//========================================
+				//Tutaj wkleic obsluge odebranych pakietow
+				//========================================
+				//i ewentualny zapis nowych wartosci
+				//========================================
+				
+				
+				try {
+					out.writeObject(wiadomosc[i]);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					System.err.println("Blad przy wysylaniu pakietu do klienta nr: " + i);
+				} 
+				
+				} while (!wiadomosc[i].koniec);
+				
+				
+				try {
+					serverSerializacji.close();
+					//server.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				}
+			
+		});
+		
+			polaczenie.start();
+		
+	}
+	
+}

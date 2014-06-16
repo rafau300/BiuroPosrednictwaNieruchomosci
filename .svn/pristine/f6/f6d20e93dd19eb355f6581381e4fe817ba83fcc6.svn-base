@@ -1,0 +1,89 @@
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
+
+public class Nieruchomosc {
+	
+	static BazaDanych baza = new BazaDanych();
+	
+	static int id;
+	boolean czyNaSprzedaz;
+	//float cena;
+	float powierzchnia;
+	int rokZbudowaniaNieruchomosci;
+	
+	static String[] miejscowosc;
+	static String[] ulica;
+	static int[] cena;
+
+	static String[] dane;
+	static String[] kolumny;
+	
+	final static JFrame f = new JFrame("Szczegolowe dane klientow");
+    static JPanel panel = new JPanel();
+    static JButton ok = new JButton ("OK");
+    
+    /**
+	 * Tworzenie i ustawianie ramki, na ktorej znajduja sie poszczegolne elementy
+	 */
+    static void ustawRamke() {
+	    f.setSize(640,480);
+        f.add(panel);
+        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+        f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
+        //f.setResizable(false);
+        //f.pack();
+        f.setLayout(new FlowLayout());
+        f.setVisible(true);
+	}
+    
+    /**
+	 * Wyswietlenie listy nieruchomosci dostepnych w bazie danych.
+	 */
+	static void wyswietlListeDostepnychNieruchomosci() {
+		//Lista dostepnych nieruchomosci
+        final JLabel label = new JLabel();
+        label.setText("Lista dostepnych nieruchomosci:");
+        panel.add(label);
+        
+        String data[][] = {};
+        String col[] = {"Miejscowosc","Ulica","cena"};
+        DefaultTableModel model = new DefaultTableModel(data,col);
+        
+        JTable tabelaNieruchomosci = new JTable(model);
+        JScrollPane scrollpane = new JScrollPane(tabelaNieruchomosci);
+        scrollpane.setPreferredSize(new Dimension(500,80));
+        panel.add(scrollpane);
+        
+        try {
+        	baza.wyswietlNieruchomosci("SELECT * FROM nieruchomosc",miejscowosc,ulica,cena);
+        
+        	int i=1;
+        	while (miejscowosc[i] != null) {
+        		model.insertRow(i-1,new Object[]{miejscowosc[i],ulica[i],cena[i]});
+        		i++;
+        	}
+        	} catch (Exception e) {
+        		//e.printStackTrace();
+        }
+	}
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		ustawRamke();
+		wyswietlListeDostepnychNieruchomosci();
+	}
+
+}

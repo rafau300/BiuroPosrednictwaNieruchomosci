@@ -1,0 +1,78 @@
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
+public class Sprzedaz {
+	
+	static BazaDanych baza = new BazaDanych();
+	static int iloscRekordow = 10;
+	static String[] imie = new String[iloscRekordow];
+	static String[] nazwisko = new String[iloscRekordow];
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		SwingUtilities.invokeLater(new Runnable() { @SuppressWarnings("static-access")
+		public void run() {
+			final JFrame f = new JFrame("Sprzedaz nieruchomosci");
+		    JPanel panel = new JPanel();
+		    f.setSize(640,480);
+	        f.add(panel);
+	        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+	        f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
+	        //f.setResizable(false);
+	        //f.pack();
+	        f.setLayout(new FlowLayout());
+	        f.setVisible(true);
+	   
+	        
+	      //Lista dostepnych kupujacych
+	        final JLabel label1 = new JLabel();
+	        label1.setText("Wybierz klienta chcacego sprzedac nieruchomosc:");
+	        panel.add(label1);
+	        
+	        String data[][] = {};
+	        String col[] = {"Imie","Nazwisko"};
+	        DefaultTableModel model = new DefaultTableModel(data,col);
+	        
+	        final JTable tabelaKlientow = new JTable(model);
+	        @SuppressWarnings("unused")
+			JScrollPane scrollpane = new JScrollPane(tabelaKlientow);
+	        tabelaKlientow.setSize(100, 100);
+	        panel.add(tabelaKlientow);
+	        
+	        try {
+	        	baza.main(null); //w funkcji main znajduje sie inicjalizacja, dlatego trzeba ja wykonac
+	        	baza.wyswietlKlientow("SELECT * FROM klient",imie,nazwisko);
+	        
+	        	int i=1;
+	        	while (imie[i] != null) {
+	        		model.insertRow(i-1,new Object[]{imie[i],nazwisko[i]});
+	        		i++;
+	        	}
+	        	} catch (Exception e) {
+	        		//e.printStackTrace();
+	        }
+	        
+	        final JButton ok = new JButton ("OK");
+	        ok.setSize(100, 50);
+	        ok.setVisible(true);
+	        panel.add(ok);
+	        
+	        ok.addActionListener(new ActionListener() {
+            	public void actionPerformed(ActionEvent e) {
+            		if (ok.isEnabled()) {
+            			f.dispose();
+            		}
+            	}
+            });
+		}
+	});
+
+}
+}

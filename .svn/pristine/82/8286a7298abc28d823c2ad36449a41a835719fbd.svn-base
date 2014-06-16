@@ -1,0 +1,98 @@
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.*;
+
+/**
+ * @author Rafal Bebenek
+ * Klasa pozwalajaca na dodanie nowego klienta do bazy
+ */
+public class DodajKlienta {
+	
+    final static JLabel labelImie = new JLabel("Imie:");
+    final static JTextField textImie = new JTextField("");
+    final static JLabel labelNazwisko = new JLabel("Nazwisko:");
+    final static JTextField textNazwisko = new JTextField("");
+    final static JLabel labelNrTelefonu = new JLabel("Numer telefonu:");
+    final static JTextField textNrTelefonu = new JTextField("");
+    final static JButton przyciskZarejestruj = new JButton("Zarejestruj klienta");
+    
+    static Klient klient = new Klient();
+	
+	/**
+	 * Dodanie nowego klienta do bazy
+	 */
+    static void listenerPrzyciskuDodajKlienta () {
+		przyciskZarejestruj.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		if(przyciskZarejestruj.isEnabled() && textImie.getText().equals("") == false) {
+        				try {
+        					int numer = Integer.parseInt(textNrTelefonu.getText());
+        					klient.dodajKlienta(textImie.getText(), textNazwisko.getText(), numer);
+        					JOptionPane.showMessageDialog(null, "Zapisano klienta: " + klient.imie + " " + klient.nazwisko + " " +klient.nrTelefonu);
+        				} catch (NumberFormatException wyjatek) {
+        					JOptionPane.showMessageDialog(null,"Telefon musi miec wartosc numeryczna!");
+        				}
+        				
+        		}
+        	}
+        });
+	}
+	
+	/**
+	 * @param args
+	 * glowna metoda
+	 */
+    public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		SwingUtilities.invokeLater(new Runnable() { public void run() {
+			final JFrame f = new JFrame("Dodaj Klienta");
+		    JPanel panel = new JPanel();
+		    f.setSize(640,480);
+	        f.add(panel);
+	        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+	        f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
+	        //f.setResizable(false);
+	        //f.pack();
+	        f.setLayout(new FlowLayout());
+	        f.setVisible(true);
+	        
+			labelImie.setVisible(true);
+			textImie.setVisible(true);
+	        panel.add(labelImie);
+	        panel.add(textImie);
+	        
+			labelNazwisko.setVisible(true);
+			textNazwisko.setVisible(true);
+	        panel.add(labelNazwisko);
+	        panel.add(textNazwisko);
+	        
+			labelNrTelefonu.setVisible(true);
+			textNrTelefonu.setVisible(true);
+	        panel.add(labelNrTelefonu);
+	        panel.add(textNrTelefonu);
+	        
+	        przyciskZarejestruj.setSize(100, 50);
+	        przyciskZarejestruj.setVisible(true);
+	        panel.add(przyciskZarejestruj);
+	        
+	        final JButton anuluj = new JButton ("Anuluj");
+	        anuluj.setSize(100, 50);
+	        anuluj.setVisible(true);
+	        panel.add(anuluj);
+	        
+	        listenerPrzyciskuDodajKlienta();
+	        
+	        anuluj.addActionListener(new ActionListener() {
+            	public void actionPerformed(ActionEvent e) {
+            		if (anuluj.isEnabled()) {
+            			f.dispose();
+            		}
+            	}
+            });
+		}
+	});
+
+}
+}

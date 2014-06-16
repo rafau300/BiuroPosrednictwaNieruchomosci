@@ -1,0 +1,113 @@
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
+public class Kupno {
+	
+	static BazaDanych baza = new BazaDanych();
+	static int iloscRekordow = 10;
+	static String[] imie = new String[iloscRekordow];
+	static String[] nazwisko = new String[iloscRekordow];
+	static String[] miejscowosc = new String[iloscRekordow];
+	static String[] ulica = new String[iloscRekordow];
+	static int[] cena = new int[iloscRekordow];
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		SwingUtilities.invokeLater(new Runnable() { @SuppressWarnings("static-access")
+		public void run() {
+			final JFrame f = new JFrame("Kupno nieruchomosci");
+		    JPanel panel = new JPanel();
+		    f.setSize(640,480);
+	        f.add(panel);
+	        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+	        f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
+	        //f.setResizable(false);
+	        //f.pack();
+	        f.setLayout(new FlowLayout());
+	        f.setVisible(true);
+	        
+	        final JButton ok = new JButton ("OK");
+	        ok.setSize(100, 50);
+	        ok.setVisible(true);
+	        
+	        //Lista dostepnych kupujacych
+	        final JLabel label1 = new JLabel();
+	        label1.setText("Wybierz klienta chcacego kupic nieruchomosc:");
+	        panel.add(label1);
+	        
+	        String data[][] = {};
+	        String col[] = {"Imie","Nazwisko"};
+	        DefaultTableModel model = new DefaultTableModel(data,col);
+	        
+	        final JTable tabelaKupujacych = new JTable(model);
+	        @SuppressWarnings("unused")
+			JScrollPane scrollpane = new JScrollPane(tabelaKupujacych);
+	        tabelaKupujacych.setSize(100, 100);
+	        panel.add(tabelaKupujacych);
+	        
+	        try {
+	        	baza.main(null); //w funkcji main znajduje sie inicjalizacja, dlatego trzeba ja wykonac
+	        	baza.wyswietlKlientow("SELECT * FROM klient",imie,nazwisko);
+	        
+	        	int i=1;
+	        	while (imie[i] != null) {
+	        		model.insertRow(i-1,new Object[]{imie[i],nazwisko[i]});
+	        		i++;
+	        	}
+	        	} catch (Exception e) {
+	        		//e.printStackTrace();
+	        }
+
+	        
+	        //Lista dostepnych nieruchomosci
+	        final JLabel label2 = new JLabel();
+	        label2.setText("Lista dostepnych nieruchomosci:");
+	        panel.add(label2);
+	        
+	        String data2[][] = {};
+	        String col2[] = {"Miejscowosc","Ulica","cena"};
+	        DefaultTableModel model2 = new DefaultTableModel(data2,col2);
+	        
+	        final JTable tabelaNieruchomosci = new JTable(model2);
+	        @SuppressWarnings("unused")
+			JScrollPane scrollpane2 = new JScrollPane(tabelaNieruchomosci);
+	        tabelaNieruchomosci.setSize(100, 100);
+	        panel.add(tabelaNieruchomosci);
+	        
+	        try {
+	        	baza.main(null); //w funkcji main znajduje sie inicjalizacja, dlatego trzeba ja wykonac
+	        	baza.wyswietlNieruchomosci("SELECT * FROM nieruchomosc",miejscowosc,ulica,cena);
+	        
+	        	int i=1;
+	        	while (miejscowosc[i] != null) {
+	        		model2.insertRow(i-1,new Object[]{miejscowosc[i],ulica[i],cena[i]});
+	        		i++;
+	        	}
+	        	} catch (Exception e) {
+	        		//e.printStackTrace();
+	        }
+	        
+	        //////////////////////////////////
+	        
+	        panel.add(ok);
+	        
+	        ok.addActionListener(new ActionListener() {
+            	public void actionPerformed(ActionEvent e) {
+            		if (ok.isEnabled()) {
+            			f.dispose();
+            		}
+            	}
+            });
+	        
+		}
+	});
+
+}
+}

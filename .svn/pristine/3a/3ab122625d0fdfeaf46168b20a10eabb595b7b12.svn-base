@@ -1,0 +1,235 @@
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.*;
+
+
+/**
+ * @author Rafal Bebenek
+ * Glowna klasa programu, za jej pomoca mozna obslugiwac system do obslugi
+ * Biura Posrednictwa Nieruchomosci.
+ * Domyslnie ta klasa powinna byc wywolywana przez uzytkownika, za jej pomoca
+ * mozna dokonywac wywolania obslugi np. dodawania klienta do bazy
+ */
+public class Biuro {
+	
+	static int szerokosc=800;
+	static int wysokosc=600;
+	
+	static Klient klient = new Klient();
+	static Sprzedaz s = new Sprzedaz();
+	static DodajKlienta dodajKlienta = new DodajKlienta();
+	static BazaDanych bazaDanych = new BazaDanych();
+	
+	static JFrame f = new JFrame("System obslugi biura posrednictwa nieruchomosci");
+    static JPanel panel = new JPanel();
+    final static JLabel label = new JLabel("Biuro");
+    final static JLabel label2 = new JLabel("Polaczono z baza");
+    final static JButton b1 = new JButton("Zaloguj");
+    final static JButton b2 = new JButton("Sprzeda¿ nieruchomosci");
+    final static JButton b3 = new JButton("Zakup nieruchomosci");
+    final static JButton b4 = new JButton("Zarejestruj klienta");
+    final static JButton przyciskWyswietlDaneKlienta = new JButton("Wyswietl dane klienta");
+    final static JButton b99 = new JButton("Powrót");
+    final static JButton przyciskWyloguj = new JButton("Wyloguj");
+    
+    final static JLabel labelLogin = new JLabel("Nazwa uzytkownika (domyslnie 'pracownik'): ");
+    final static JLabel labelHaslo = new JLabel("Haslo (domyslnie 'haslo'): ");
+    final static JTextField login = new JTextField();
+    final static JPasswordField haslo = new JPasswordField();
+	
+	public Biuro() {
+		
+	}
+	
+	/**
+	 * Ustawianie ramki
+	 */
+	static void ustawRamke() {
+        f.setSize(szerokosc,wysokosc);
+        f.add(panel);
+        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+        f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
+        panel.add(label);
+        label2.setVisible(false);
+        panel.add(label2);
+        //f.setResizable(false);
+        //f.pack();
+        f.setLayout(new FlowLayout());
+        f.setVisible(true);
+	}
+	
+	/**
+	 * Ustawienie przyciskow do zalogowania, czyli na ekranie widac tylko pola tekstowe
+	 * i przycisk "zaloguj"
+	 */
+	static void ustawPrzyciski () {
+        labelLogin.setVisible(true);
+        labelHaslo.setVisible(true);
+        login.setVisible(true);
+        haslo.setVisible(true);
+        panel.add(labelLogin);
+        panel.add(login);
+        panel.add(labelHaslo);
+        panel.add(haslo);
+        
+		b1.setSize(100, 50);
+		b1.setVisible(true);
+        panel.add(b1);
+		
+        b2.setSize(100, 50);
+        b2.setVisible(false);
+        panel.add(b2);
+        
+        b3.setSize(100, 50);
+        b3.setVisible(false);
+        panel.add(b3);
+        
+        b4.setSize(100, 50);
+        b4.setVisible(false);
+        panel.add(b4);
+        
+        przyciskWyswietlDaneKlienta.setSize(100, 50);
+        przyciskWyswietlDaneKlienta.setVisible(false);
+        panel.add(przyciskWyswietlDaneKlienta);
+        
+        b99.setSize(100, 50);
+        b99.setVisible(false);
+        panel.add(b99);
+        
+        przyciskWyloguj.setSize(100, 50);
+        przyciskWyloguj.setVisible(false);
+        panel.add(przyciskWyloguj);
+	}
+	
+	/**
+	 * Ukrywanie rzeczy od logowania i pokazywanie przyciskow, ktore pozwalaja wybrac
+	 * odpowiednie opcje w systemie.
+	 * Czyli pokazanie tych rzeczy, ktore wyswietlaja sie po poprawnym zalogowaniu do systemu.
+	 */
+	static void ustawWidocznoscPoZalogowaniu () {
+		b1.setName("ASDF");
+		b1.setVisible(false);
+		label.setText("Zalogowano do systemu");
+		label2.setVisible(true);
+		b2.setVisible(true);
+		b3.setVisible(true);
+		b4.setVisible(true);
+		przyciskWyswietlDaneKlienta.setVisible(true);
+		b99.setVisible(false);
+		labelLogin.setVisible(false);
+        labelHaslo.setVisible(false);
+        login.setVisible(false);
+        haslo.setVisible(false);
+        przyciskWyloguj.setVisible(true);
+	}
+	
+	/**
+	 * Zalogowanie do systemu, listener przycisku 'Zaloguj'.
+	 */
+	static void listenerPrzyciskuZaloguj () {
+        b1.addActionListener(new ActionListener() {
+			@SuppressWarnings({ "deprecation", "static-access" })
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				if(b1.isEnabled()) {
+					if (login.getText().equals("pracownik") && haslo.getText().equals("haslo")) {
+						ustawWidocznoscPoZalogowaniu();
+						if (bazaDanych.polaczenie.length() != 0)
+							label2.setText("Polaczono z baza danych: " + bazaDanych.polaczenie);
+					}
+					else {
+						JOptionPane.showMessageDialog(null,"Nieprawidlowe dane logowania!");
+					}
+				}
+			}
+        	
+        });
+	}
+	
+	/**
+	 * Wywolanie okna pozwalajacego na sprzedaz nieruchomosci
+	 */
+	static void listenerPrzyciskuSprzedazNieruchomosci () {
+        b2.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		if (b2.isEnabled()) {
+        			Sprzedaz.main(null);
+        		}
+        	}
+        });
+	}
+	
+	/**
+	 * Wywolanie okna pozwalajacego na dodanie nowego klienta do bazy
+	 */
+	static void listenerPrzyciskuDodajKlienta () {
+		b4.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		if(b4.isEnabled()) {
+        			DodajKlienta.main(null);
+        		}
+        	}
+        });
+	}
+	
+	static void listenerPrzyciskuWyswietlDaneKlienta() {
+		przyciskWyswietlDaneKlienta.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (przyciskWyswietlDaneKlienta.isEnabled()) {
+					Klient.main(null);
+				}
+			}
+		});
+	}
+
+	/**
+	 * @param args
+	 * glowna metoda w programie, tak wlasciwie to tylko wywoluje inne metody
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+        SwingUtilities.invokeLater(new Runnable() { public void run() {
+            
+        	ustawRamke();
+            ustawPrzyciski();
+                        
+            listenerPrzyciskuZaloguj();
+            listenerPrzyciskuDodajKlienta();
+            listenerPrzyciskuSprzedazNieruchomosci();
+            listenerPrzyciskuWyswietlDaneKlienta();
+            
+            b3.addActionListener(new ActionListener() {
+            	public void actionPerformed(ActionEvent e) {
+            		if (b2.isEnabled()) {
+            			Kupno.main(null);
+            		}
+            	}
+            });
+            
+
+            b99.addActionListener(new ActionListener() {
+            	public void actionPerformed(ActionEvent e) {
+            		if (b99.isEnabled()) {
+            			ustawWidocznoscPoZalogowaniu();
+            		}
+            	}
+            });
+            
+            przyciskWyloguj.addActionListener(new ActionListener() {
+            	public void actionPerformed(ActionEvent e) {
+            		if (przyciskWyloguj.isEnabled()) {
+            			login.setText(null);
+            			haslo.setText(null);
+            			ustawRamke();
+            			ustawPrzyciski();
+            		}
+            	}
+            });
+            
+        } });
+
+	}
+
+}

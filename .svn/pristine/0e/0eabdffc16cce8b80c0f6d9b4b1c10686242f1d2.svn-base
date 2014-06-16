@@ -1,0 +1,31 @@
+
+public class Klient {
+	
+	Nieruchomosc nieruchomosc = new Nieruchomosc();
+	
+	int id;
+	String imie;
+	String nazwisko;
+	int nrTelefonu;
+	
+	Klient() {
+		imie="Janusz";
+		nazwisko="Korwin Mikke";
+		nrTelefonu=123456789;
+	}
+	
+	void dodajKlienta(String imie, String nazwisko, int nrTelefonu) {
+		this.imie=imie;
+		this.nazwisko=nazwisko;
+		this.nrTelefonu=nrTelefonu;
+	}
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

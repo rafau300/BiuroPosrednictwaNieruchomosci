@@ -1,0 +1,210 @@
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
+/**
+ * 
+ * @author Rafal Bebenek
+ *
+ * Klasa pozwalajaca na sprzedaz nieruchomosci w imieniu klienta.
+ * Najpierw nalezy wybrac klienta, ktory chce dodac nieruchomosc do bazy danych.
+ * Nastepnie trzeba wypelnic pola tekstowe odpowieniemi wartosciami dotyczacych
+ * konkretnej nieruchomosci.
+ */
+public class Sprzedaz {
+	
+	final static JFrame f = new JFrame("Sprzedaz nieruchomosci");
+	static JPanel panel = new JPanel();
+	
+	final static JLabel labelUlica = new JLabel("Ulica:");
+    final static JTextField textUlica = new JTextField("");
+    final static JLabel labelNrDomu = new JLabel("Numer domu:");
+    final static JTextField textNrDomu = new JTextField("");
+    final static JLabel labelNrMieszkania = new JLabel("Numer mieszkania:");
+    final static JTextField textNrMieszkania = new JTextField("");
+    final static JLabel labelKodPocztowy = new JLabel("Kod pocztowy:");
+    final static JTextField textKodPocztowy = new JTextField("");
+    final static JLabel labelMiejscowosc = new JLabel("Miejscowosc:");
+    final static JTextField textMiejscowosc = new JTextField("");
+    final static JLabel labelPowierzchnia = new JLabel("Powierzchnia:");
+    final static JTextField textPowierzchnia = new JTextField("");
+    final static JLabel labelCena = new JLabel("Cena:");
+    final static JTextField textCena = new JTextField("");
+    final static JLabel labelRokBudowy = new JLabel("Rok wybudowania:");
+    final static JTextField textRokBudowy = new JTextField("");
+    
+    final static JButton przyciskDodajNieruchomosc = new JButton("Dodaj do bazy");
+    static String data[][] = {};
+    static String col[] = {"Imie","Nazwisko"};
+    static DefaultTableModel model = new DefaultTableModel(data,col);
+    final static JTable tabelaKlientow = new JTable(model);
+	
+	static BazaDanych baza = new BazaDanych();
+	static int iloscRekordow = 10;
+	static String[] imie = new String[iloscRekordow];
+	static String[] nazwisko = new String[iloscRekordow];
+
+	
+	static void listenerPrzyciskuDodajNieruchomosc () {
+		przyciskDodajNieruchomosc.addActionListener(new ActionListener() {
+        	@SuppressWarnings("static-access")
+			public void actionPerformed(ActionEvent e) {
+        		if(przyciskDodajNieruchomosc.isEnabled() && textMiejscowosc.getText().equals("") == false) {
+        				try {
+        					baza.main(null);
+        					int id = baza.liczbaNieruchomosci;
+        					String ulica = textUlica.getText();
+        					String nr_domu = textNrDomu.getText();
+        					String kod_pocztowy = textKodPocztowy.getText();
+        					String miejscowosc = textMiejscowosc.getText();
+        					int powierzchnia = Integer.parseInt(textPowierzchnia.getText());
+        					int cena = Integer.parseInt(textCena.getText());
+        					int rok_budowy = Integer.parseInt(textRokBudowy.getText());
+        					int id_wlasciciela = tabelaKlientow.getSelectedRow() + 1;
+        					
+        					String skrypt = new String();
+        					skrypt = "INSERT INTO nieruchomosc(id, ulica, nr_domu, kod_pocztowy, miejscowosc, powierzchnia, cena, rok_budowy, id_wlasciciela) " +
+        					"VALUES (" + id + ", '" + ulica + "', '" + nr_domu + "', '" + kod_pocztowy + 
+        					"', '" + miejscowosc + "', " + powierzchnia + ", " + cena + ", " + rok_budowy + ", " + id_wlasciciela + ")";
+        					
+        					baza.insert(skrypt);
+        					
+        				} catch (NumberFormatException wyjatek) {
+        					JOptionPane.showMessageDialog(null,"Podaj cene!");
+        					wyjatek.printStackTrace();
+        				}
+        				catch (Exception wyjatek) {
+        					JOptionPane.showMessageDialog(null,"Wystapil blad!");
+        				}
+        				finally {
+        					f.dispose();
+        				}
+        		}
+        	}
+        });
+	}
+	
+	/**
+	 * Tworzenie i ustawianie ramki.
+	 */
+	static void ustawRamke() {
+		f.setSize(640,480);
+        f.add(panel);
+        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+        f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
+        //f.setResizable(false);
+        //f.pack();
+        f.setLayout(new FlowLayout());
+        f.setVisible(true);
+	}
+	
+	@SuppressWarnings("static-access")
+	/**
+	 * Metoda pozwalajaca na wybranie klienta.
+	 * Dane wpisane w ponizsze pola beda widoczne jako nieruchomosc wybranego klienta.
+	 */
+	static void wyswietlListeKlientow() {
+		//Lista dostepnych kupujacych
+        final JLabel label1 = new JLabel();
+        label1.setText("Wybierz klienta chcacego sprzedac nieruchomosc:");
+        panel.add(label1);
+        
+		JScrollPane scrollpane = new JScrollPane(tabelaKlientow);
+        scrollpane.setPreferredSize(new Dimension(150,80));
+        panel.add(scrollpane);
+        
+        try {
+        	baza.main(null); //w funkcji main znajduje sie inicjalizacja, dlatego trzeba ja wykonac
+        	baza.wyswietlKlientow("SELECT * FROM klient",imie,nazwisko);
+        
+        	int i=1;
+        	while (imie[i] != null) {
+        		model.insertRow(i-1,new Object[]{imie[i],nazwisko[i]});
+        		i++;
+        	}
+        	} catch (Exception e) {
+        		//e.printStackTrace();
+        }
+	}
+	
+	/**
+	 * Ustawianie widocznosci labeli i pol tekstowych, nastepnie umieszczenie ich
+	 * na panelu widocznym na ekranie
+	 */
+	static void ustawLabeleIPolaTekstowe() {
+		labelUlica.setVisible(true);
+		textUlica.setVisible(true);
+        panel.add(labelUlica);
+        panel.add(textUlica);
+        
+		labelNrDomu.setVisible(true);
+		textNrDomu.setVisible(true);
+        panel.add(labelNrDomu);
+        panel.add(textNrDomu);
+        
+        labelKodPocztowy.setVisible(true);
+		textKodPocztowy.setVisible(true);
+        panel.add(labelKodPocztowy);
+        panel.add(textKodPocztowy);
+        
+        labelMiejscowosc.setVisible(true);
+		textMiejscowosc.setVisible(true);
+        panel.add(labelMiejscowosc);
+        panel.add(textMiejscowosc);
+        
+        labelPowierzchnia.setVisible(true);
+		textPowierzchnia.setVisible(true);
+        panel.add(labelPowierzchnia);
+        panel.add(textPowierzchnia);
+        
+		labelCena.setVisible(true);
+		textCena.setVisible(true);
+        panel.add(labelCena);
+        panel.add(textCena);
+        
+        labelRokBudowy.setVisible(true);
+		textRokBudowy.setVisible(true);
+        panel.add(labelRokBudowy);
+        panel.add(textRokBudowy);
+
+        przyciskDodajNieruchomosc.setSize(100, 50);
+        przyciskDodajNieruchomosc.setVisible(true);
+        panel.add(przyciskDodajNieruchomosc);
+	}
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		SwingUtilities.invokeLater(new Runnable() { public void run() {
+		    
+		    ustawRamke();	   
+	        wyswietlListeKlientow();
+	      
+	        ustawLabeleIPolaTekstowe();
+	       
+	        listenerPrzyciskuDodajNieruchomosc();
+	        
+	        
+	        final JButton anuluj = new JButton ("Anuluj");
+	        anuluj.setSize(100, 50);
+	        anuluj.setVisible(true);
+	        panel.add(anuluj);
+	        
+	        anuluj.addActionListener(new ActionListener() {
+            	public void actionPerformed(ActionEvent e) {
+            		if (anuluj.isEnabled()) {
+            			f.dispose();
+            		}
+            	}
+            });
+		}
+	});
+
+}
+}

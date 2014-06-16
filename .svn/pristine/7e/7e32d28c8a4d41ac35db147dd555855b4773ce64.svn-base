@@ -1,0 +1,25 @@
+import java.sql.Connection;  
+import java.sql.DriverManager;  
+import java.sql.SQLException;  
+  
+public class PolaczZBazaDanych    {  
+
+	public static String polaczenie = new String();
+	
+	public static void main(String[] args) {  
+        try {  
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Connection con = DriverManager.getConnection("jdbc:oracle:thin:@//localhost:1521/xe","sys AS SYSDBA","sys");  
+            polaczenie = con.toString();
+            System.out.println("Polaczono z: " + con);  
+        } catch (ClassNotFoundException e) {  
+            // TODO Auto-generated catch block  
+            e.printStackTrace();  
+        } catch (SQLException e) {  
+            // TODO Auto-generated catch block  
+            e.printStackTrace();  
+        }  
+          
+    }  
+  
+}  

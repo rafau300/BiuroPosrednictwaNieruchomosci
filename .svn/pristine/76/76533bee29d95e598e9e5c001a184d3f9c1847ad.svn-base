@@ -1,0 +1,215 @@
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
+
+/** 
+ * Klasa, w  ktorej znajduja sie szczegolowe dane klientow.
+ * Nalezy wybrac odpowienia osobe za pomoca myszy w pierszej tabeli, a szczegolowe dane
+ * beda wyswietlone w drugiej. Jesli dane nie mieszcza sie w tabeli, to automatycznie utworzy
+ * sie pasek przewijania.
+ * @author Rafal Bebenek
+ */
+public class Klient implements Zmienne{
+	
+	static int id;
+	static String[] dane = new String[LICZBA_REKORDOW];
+	static String[] kolumny = new String[LICZBA_REKORDOW];
+	
+	final static JFrame f = new JFrame("Szczegolowe dane klientow");
+    static JPanel panel = new JPanel();
+    static JButton ok = new JButton ("OK");
+	
+	static BazaDanych baza = new BazaDanych();
+	static int iloscRekordow = 50;
+	static String[] imiona = new String[iloscRekordow];
+	static String[] nazwiska = new String[iloscRekordow];
+	
+	static JLabel label1 = new JLabel();
+	static String data[][] = {};
+    static String col[] = {"Imie","Nazwisko"};
+    static DefaultTableModel model = new DefaultTableModel(data,col);
+    
+    static JTable tabelaKupujacych = new JTable(model);
+    static JScrollPane scrollpane = new JScrollPane(tabelaKupujacych);
+	
+    static JLabel label2 = new JLabel();
+    static String data2[][] = {};
+    static String col2[] = {"Typ","Dane"};
+    static DefaultTableModel model2 = new DefaultTableModel(data2,col2);
+    
+    static JTable tabelaZDanymi = new JTable(model2);
+    static JScrollPane scrollpane2 = new JScrollPane(tabelaZDanymi);
+    
+    
+    static Serwer serwer = new Serwer();
+    static Biuro biuro = new Biuro();
+    
+    
+		
+		/**
+		 * Tworzenie i ustawianie ramki, na ktorej znajduja sie poszczegolne elementy
+		 */
+		static void ustawRamke() {
+		    f.setSize(640,480);
+	        f.add(panel);
+	        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+	        f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
+	        //f.setResizable(false);
+	        //f.pack();
+	        f.setLayout(new FlowLayout());
+	        f.setVisible(true);
+		}
+		
+		/**
+		 * Metoda wyswietlajaca wszystkich klientow w ramce, klikniecie w poszczegolna osobe
+		 * wyswietla szczegolowe dane
+		 */
+		static void wyswietlListeKlientow() {
+			//Lista dostepnych kupujacych
+	        
+	        label1.setText("Wybierz klienta:");
+	        panel.add(label1);
+	        
+
+	        scrollpane.setVisible(true);
+	        scrollpane.setPreferredSize(new Dimension(500,150));
+	        panel.add(scrollpane);
+	        
+	        try {
+	        	serwer.wyswietlKlientow("SELECT * FROM klient",imiona,nazwiska);
+	        	//baza.wyswietlKlientow("SELECT * FROM klient",imiona,nazwiska);
+	     
+	        	
+	        	int i=1;
+	        	while (imiona[i] != null) {
+	        		model.insertRow(i-1,new Object[]{imiona[i],nazwiska[i]});
+	        		i++;
+	        	}
+	        	
+	        	} catch (Exception e) {
+	        		e.printStackTrace();
+	        }
+	        
+	        MouseListener listener = new MouseAdapter() {
+	            @Override
+	            public void mouseClicked(MouseEvent e) {
+	                  //id = tabelaKupujacych.rowAtPoint(e.getPoint())+1;
+	                  id = tabelaKupujacych.getSelectedRow() + 1;
+	                  edytujSzczegoloweDaneKlienta(id);
+	            }
+	         };
+	         
+	         tabelaKupujacych.addMouseListener(listener);
+
+		}
+	
+	/**
+	 * Metoda, ktora pozwala na wyswietlenie szczegolowych danych konkretnego klienta.
+	 * @param id ID klienta, w drugiej tabeli ze szczegolami beda wyswietlone dane klienta o tym ID
+	 */
+	public static void wyswietlSzczegoloweDaneKlienta(int id) {
+        
+        label2.setText("Szczegolowe dane wybranego klienta:");
+        panel.add(label2);
+        
+		try {
+			serwer.wyswietlSzczegoloweDaneKlienta(id, dane, kolumny);
+        	//baza.wyswietlSzczegoloweDaneKlienta(id, dane, kolumny);        	
+        	} catch (Exception e) {
+        		e.printStackTrace();
+        	}
+	        scrollpane2.setVisible(true);
+	        scrollpane2.setPreferredSize(new Dimension(500,150));
+	        panel.add(scrollpane2);
+	        
+	        int i=1;
+	        try {
+	        	while (dane[i] != null) {
+	        		model2.insertRow(i-1, new Object[]{kolumny[i],dane[i]});
+	        		i++;
+	        	}
+	        } catch (Exception e) {
+	        	e.printStackTrace();
+	        }
+	}
+	
+	/**
+	 * Metoda dzialajaca niemal identycznie, jak wyswietlSzczegoloweDaneKlienta, lecz nie 
+	 * tworzy tabeli, i usuwa poprzednie dane
+	 * @param id ID klienta
+	 */
+	public static void edytujSzczegoloweDaneKlienta(int id) {
+		try {
+        	baza.wyswietlSzczegoloweDaneKlienta(id, dane, kolumny);        	
+        	} catch (Exception e) {
+        		//e.printStackTrace();
+        	}
+	        
+	        
+		int i;
+		//for (i = model2.getRowCount();i>0;i--);
+		//	model2.removeRow(i);
+		model2.setRowCount(0);
+		
+			i=1;
+	        try {
+	        	while (dane[i] != null) {
+	        		model2.insertRow(i-1, new Object[]{kolumny[i],dane[i]});
+	        		i++;
+	        	}
+	        } catch (Exception e) {
+	        	e.printStackTrace();
+	        }
+	}
+	
+
+	/**
+	 * Glowna metoda sluzy glownie do wywolywania innych metod
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		SwingUtilities.invokeLater(new Runnable() { public void run() {
+
+			ustawRamke();
+	         
+	        ok.setSize(100, 50);
+	        ok.setVisible(true);
+	        
+	        model.setRowCount(0);
+	        model2.setRowCount(0);
+	        
+	        wyswietlListeKlientow();
+	        wyswietlSzczegoloweDaneKlienta(1);
+	        
+	        panel.add(ok);
+	        
+	        ok.addActionListener(new ActionListener() {
+            	public void actionPerformed(ActionEvent e) {
+            		if (ok.isEnabled()) {
+            			f.dispose();
+            			baza.zamknijPolaczenie();
+            		}
+            	}
+            });
+	        
+	    
+	        
+		}
+	});
+	}
+
+}

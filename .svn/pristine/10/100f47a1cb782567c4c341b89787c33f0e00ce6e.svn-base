@@ -1,0 +1,17 @@
+
+public class Nieruchomosc {
+	
+	int id;
+	boolean czyNaSprzedaz;
+	float cena;
+	float powierzchnia;
+
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

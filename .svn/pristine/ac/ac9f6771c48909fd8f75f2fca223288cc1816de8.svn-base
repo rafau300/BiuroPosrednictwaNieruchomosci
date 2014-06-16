@@ -1,0 +1,141 @@
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+
+/**
+ * 
+ * @author Rafal Bebenek
+ * Ta klasa pozwala na zakupienie przez uzytkownika nieruchomosci.
+ * Najpierw naezy zaznaczyc klienta, ktory dokonuje transakcji, nastepnie nieuchomosc
+ * do kupienia.
+ */
+public class Kupno {
+	
+	final static JFrame f = new JFrame("Kupno nieruchomosci");
+    static JPanel panel = new JPanel();
+    static JButton ok = new JButton ("OK");
+	
+	static BazaDanych baza = new BazaDanych();
+	static int iloscRekordow = 50;
+	static String[] imie = new String[iloscRekordow];
+	static String[] nazwisko = new String[iloscRekordow];
+	static String[] miejscowosc = new String[iloscRekordow];
+	static String[] ulica = new String[iloscRekordow];
+	static int[] cena = new int[iloscRekordow];
+
+	/**
+	 * Tworzenie i ustawianie ramki, na ktorej znajduja sie poszczegolne elementy
+	 */
+	static void ustawRamke() {
+	    f.setSize(640,480);
+        f.add(panel);
+        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+        f.setDefaultCloseOperation (JFrame.DISPOSE_ON_CLOSE);
+        //f.setResizable(false);
+        //f.pack();
+        f.setLayout(new FlowLayout());
+        f.setVisible(true);
+	}
+	
+	
+	/**
+	 * Metoda wyswietlajaca wszystkich klientow w ramce, klikniecie w poszczegolna osobe
+	 * ustawia ja jako osobe kupujaca.
+	 */
+	static void wyswietlListeKlientow() {
+		//Lista dostepnych kupujacych
+        final JLabel label1 = new JLabel();
+        label1.setText("Wybierz klienta chcacego kupic nieruchomosc:");
+        panel.add(label1);
+        
+        String data[][] = {};
+        String col[] = {"Imie","Nazwisko"};
+        DefaultTableModel model = new DefaultTableModel(data,col);
+        
+        JTable tabelaKupujacych = new JTable(model);
+        JScrollPane scrollpane = new JScrollPane(tabelaKupujacych);
+        scrollpane.setVisible(true);
+        scrollpane.setPreferredSize(new Dimension(500,80));
+        panel.add(scrollpane);
+        
+        try {
+        	baza.wyswietlKlientow("SELECT * FROM klient",imie,nazwisko);
+        
+        	int i=1;
+        	while (imie[i] != null) {
+        		model.insertRow(i-1,new Object[]{imie[i],nazwisko[i]});
+        		i++;
+        	}
+        	} catch (Exception e) {
+        		//e.printStackTrace();
+        }
+
+	}
+	
+	
+	/**
+	 * Wyswietlenie listy nieruchomosci, ktore sa wystawione na sprzedaz.
+	 * Klikniecie na konkretna nieruchomosc powoduje jej wybranie, po zatwierdzeniu
+	 * ta nierchomosc powinna stac sie wlasnoscia klienta wybranego w pozwyzszej tabeli.
+	 */
+	static void wyswietlListeDostepnychNieruchomosci() {
+		//Lista dostepnych nieruchomosci
+        final JLabel label2 = new JLabel();
+        label2.setText("Lista dostepnych nieruchomosci:");
+        panel.add(label2);
+        
+        String data2[][] = {};
+        String col2[] = {"Miejscowosc","Ulica","cena"};
+        DefaultTableModel model2 = new DefaultTableModel(data2,col2);
+        
+        JTable tabelaNieruchomosci = new JTable(model2);
+        JScrollPane scrollpane2 = new JScrollPane(tabelaNieruchomosci);
+        scrollpane2.setPreferredSize(new Dimension(500,80));
+        panel.add(scrollpane2);
+        
+        try {
+        	baza.wyswietlNieruchomosci("SELECT * FROM nieruchomosc",miejscowosc,ulica,cena);
+        
+        	int i=1;
+        	while (miejscowosc[i] != null) {
+        		model2.insertRow(i-1,new Object[]{miejscowosc[i],ulica[i],cena[i]});
+        		i++;
+        	}
+        	} catch (Exception e) {
+        		//e.printStackTrace();
+        }
+	}
+	
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		SwingUtilities.invokeLater(new Runnable() { public void run() {
+
+			ustawRamke();
+	         
+	        ok.setSize(100, 50);
+	        ok.setVisible(true);
+	        
+	        wyswietlListeKlientow();
+	        wyswietlListeDostepnychNieruchomosci();
+	        
+	        panel.add(ok);
+	        
+	        ok.addActionListener(new ActionListener() {
+            	public void actionPerformed(ActionEvent e) {
+            		if (ok.isEnabled()) {
+            			f.dispose();
+            		}
+            	}
+            });
+	        
+		}
+	});
+
+}
+}
